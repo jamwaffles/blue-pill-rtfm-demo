@@ -2,7 +2,7 @@
 
 This demo will flash the onboard LED (pin PC13) on a Blue Pill STM32 breakout board.
 
-The board is programmed over the serial port on pins A9 and A10 using an FT232 USB to serial converter. There's no debugger, but if you don't have access to an ST-Link or other OpenOCD-compatibly hardware, this is a good way to get started.
+The board is programmed over the serial port on pins A9 and A10 using an FT232 USB to serial converter. There's no debugger, but if you don't have access to an ST-Link or other OpenOCD-compatible hardware, this is a good way to get started.
 
 Tested in Windows and Windows Subsystem for Linux, highly likely to work in actual Linux, probably works on macOS with some changes.
 
@@ -18,7 +18,9 @@ Taken largely from [the cortex-m-quickstart docs](https://docs.rs/cortex-m-quick
 - `cargo install xargo`
 - Install [stm32flash](https://sourceforge.net/projects/stm32flash/)
 	- Linux (Ubuntu/WSL): `sudo apt-get install stm32flash`
-	- Windows: Download [the archive](https://sourceforge.net/projects/stm32flash/), extract it and place `stm32flash.exe` somewhere convenient.
+	- Windows:
+		- Download [the archive](https://sourceforge.net/projects/stm32flash/), extract it and place `stm32flash.exe` somewhere convenient.
+		- Or just use the bundled binary in `./stm32flash-0.5-win64`
 
 ## Hardware setup
 
