@@ -1,19 +1,21 @@
-// Blinks an LED on PC13
-// Code shamelessly lifted from https://github.com/japaric/stm32f103xx-hal/blob/master/examples/blinky.rs
-// Thank you for your hard work @japaric!
-
-#![deny(unsafe_code)]
-#![deny(warnings)]
 #![no_std]
 
 extern crate cortex_m;
+// extern crate mpu9250;
 extern crate stm32f103xx_hal as hal;
+extern crate embedded_hal;
 #[macro_use(block)]
 extern crate nb;
 
+use cortex_m::asm;
+use hal::delay::Delay;
 use hal::prelude::*;
+use hal::spi::{ Spi };
+use embedded_hal::spi::{ Mode, Phase, Polarity };
 use hal::stm32f103xx;
-use hal::timer::Timer;
+use embedded_hal::blocking::spi::Transfer;
+// use hal::timer::Timer;
+// use mpu9250::Mpu9250;
 
 fn main() {
     let cp = cortex_m::Peripherals::take().unwrap();
@@ -24,16 +26,52 @@ fn main() {
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut gpioc = dp.GPIOC.split(&mut rcc.apb2);
+    let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
 
-    let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+    let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
 
-    let mut timer = Timer::syst(cp.SYST, 1.hz(), clocks);
+    let nss = gpioa.pa4.into_push_pull_output(&mut gpioa.crl);
 
-    loop {
-        block!(timer.wait()).unwrap();
-        led.set_high();
-        block!(timer.wait()).unwrap();
-        led.set_low();
-    }
+    // SPI1
+    let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
+    let miso = gpioa.pa6;
+    let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
+
+    let mut spi = Spi::spi1(
+        dp.SPI1,
+        (sck, miso, mosi),
+        &mut afio.mapr,
+        Mode {
+            polarity: Polarity::IdleHigh,
+            phase: Phase::CaptureOnFirstTransition,
+        },
+        1.hz(),
+        clocks,
+        &mut rcc.apb2,
+    );
+
+    // let mut timer = Timer::syst(cp.SYST, 1.hz(), clocks);
+
+    // loop {
+        spi.transfer(&mut [ 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000 ]);
+
+        // block!(timer.wait()).unwrap();
+    // }
+
+    // loop {
+    //     // spi.send(0b1111_0000);
+    //     spi.transfer(&mut [ 0b1111_0000 ]);
+    // }
+
+    // let mut delay = Delay::new(cp.SYST, clocks);
+
+    // let mut mpu9250 = Mpu9250::new(spi, nss, &mut delay).unwrap();
+
+    // // sanity checks
+    // assert_eq!(mpu9250.who_am_i().unwrap(), 0x71);
+    // assert_eq!(mpu9250.ak8963_who_am_i().unwrap(), 0x48);
+
+    // let _a = mpu9250.all().unwrap();
+
+    asm::bkpt();
 }
