@@ -1,0 +1,41 @@
+# Arguments and setup for running in GDB
+[target.thumbv6m-none-eabi]
+runner = 'arm-none-eabi-gdb'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "linker=arm-none-eabi-ld",
+  "-Z", "linker-flavor=ld",
+  "-Z", "thinlto=no",
+]
+
+[target.thumbv7m-none-eabi]
+runner = 'arm-none-eabi-gdb'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "linker=arm-none-eabi-ld",
+  "-Z", "linker-flavor=ld",
+  "-Z", "thinlto=no",
+]
+
+[target.thumbv7em-none-eabi]
+runner = 'arm-none-eabi-gdb'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "linker=arm-none-eabi-ld",
+  "-Z", "linker-flavor=ld",
+  "-Z", "thinlto=no",
+]
+
+[target.thumbv7em-none-eabihf]
+runner = 'arm-none-eabi-gdb'
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "linker=arm-none-eabi-ld",
+  "-Z", "linker-flavor=ld",
+  "-Z", "thinlto=no",
+]
+
+# Target the STM32F103 by default
+# Uncomment if you want to stop putting `--target thumbv7em-none-eabihf` in your xargo commands
+# [build]
+# target = "thumbv7em-none-eabihf"
