@@ -1,6 +1,7 @@
 #![no_std]
 
 extern crate cortex_m;
+extern crate cortex_m_semihosting as sh;
 // extern crate mpu9250;
 extern crate stm32f103xx_hal as hal;
 extern crate embedded_hal;
@@ -14,8 +15,12 @@ use hal::spi::{ Spi };
 use embedded_hal::spi::{ Mode, Phase, Polarity };
 use hal::stm32f103xx;
 use embedded_hal::blocking::spi::Transfer;
-// use hal::timer::Timer;
+use hal::timer::Timer;
 // use mpu9250::Mpu9250;
+
+use core::fmt::Write;
+
+use sh::hio;
 
 fn main() {
     let cp = cortex_m::Peripherals::take().unwrap();
@@ -42,20 +47,48 @@ fn main() {
         (sck, miso, mosi),
         &mut afio.mapr,
         Mode {
-            polarity: Polarity::IdleHigh,
+            polarity: Polarity::IdleLow,
             phase: Phase::CaptureOnFirstTransition,
         },
-        1.hz(),
+        6_400_000.hz(),
         clocks,
         &mut rcc.apb2,
     );
 
-    // let mut timer = Timer::syst(cp.SYST, 1.hz(), clocks);
+    let mut timer = Timer::syst(cp.SYST, 1.hz(), clocks);
+
+    const ON_BYTE: u8 = 0b1111_1100;
+    const OFF_BYTE: u8 = 0b1100_0000;
 
     // loop {
-        spi.transfer(&mut [ 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000, 0b1111_0000 ]);
+        spi.transfer(&mut [
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+            OFF_BYTE,
+            ON_BYTE,
+        ]);
 
-        // block!(timer.wait()).unwrap();
+    //     block!(timer.wait()).unwrap();
     // }
 
     // loop {
