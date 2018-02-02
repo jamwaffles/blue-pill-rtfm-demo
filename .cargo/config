@@ -27,7 +27,7 @@ rustflags = [
 ]
 
 [target.thumbv7em-none-eabihf]
-runner = 'arm-none-eabi-gdb'
+runner = 'arm-none-eabi-gdb.exe -iex "set auto-load safe-path /"'
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
@@ -37,5 +37,5 @@ rustflags = [
 
 # Target the STM32F103 by default
 # Uncomment if you want to stop putting `--target thumbv7em-none-eabihf` in your xargo commands
-# [build]
-# target = "thumbv7em-none-eabihf"
+[build]
+target = "thumbv7em-none-eabihf"
