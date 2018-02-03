@@ -14,7 +14,7 @@ Taken largely from [the cortex-m-quickstart docs](https://docs.rs/cortex-m-quick
 - Install the ARM development toolchain
 	- Linux (Ubuntu/WSL): `sudo apt-get install -y binutils-arm-none-eabi gdb-arm-none-eabi`
 	- Windows: download and install the tooclhain from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
-- `rustup component add src-src`
+- `rustup component add rust-src`
 - `cargo install xargo`
 - Install [stm32flash](https://sourceforge.net/projects/stm32flash/)
 	- Linux (Ubuntu/WSL): `sudo apt-get install stm32flash`

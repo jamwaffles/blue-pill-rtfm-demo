@@ -11,6 +11,7 @@ extern crate stm32f103xx_hal as hal;
 extern crate embedded_hal;
 extern crate aligned;
 
+use cortex_m::asm;
 use aligned::Aligned;
 use hal::prelude::*;
 use hal::time::{Hertz};
@@ -86,7 +87,9 @@ fn init(p: init::Peripherals) -> init::LateResources {
         clocks,
         &mut rcc.apb1,
     )
+    // PA3 (because T2C4 is on PA3, c4 above is 3rd item in tuple (0 indexed))
     .3;
+
     pwm.enable();
 
     writeln!(hstdout, "Init success").unwrap();
