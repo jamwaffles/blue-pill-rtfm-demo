@@ -34,6 +34,7 @@ struct SSD1306<SPI, RST, DC>
     spi: SPI,
     rst: RST,
     dc: DC,
+    buffer: [u8; 1024],
 }
 
 impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
@@ -46,6 +47,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             spi,
             rst,
             dc,
+            buffer: [0b10101010; 1024],
         }
     }
 
@@ -86,6 +88,23 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
         for cmd in init_commands.iter() {
             self.cmd(*cmd);
         }
+    }
+
+    pub fn flush(&mut self) {
+        let flush_commands: [ u8; 6 ] = [
+             0x21, // columns
+             0, 127,
+             0x22, // pages
+             0, 7 /* (height>>3)-1 */];
+
+        for cmd in flush_commands.iter() {
+            self.cmd(*cmd);
+        }
+
+        // Not a command
+        self.dc.set_high();
+
+        self.spi.write(&self.buffer);
     }
 }
 
@@ -162,7 +181,9 @@ fn init(p: init::Peripherals) -> init::LateResources {
     disp.reset();
     disp.init();
 
-    disp.cmd(0xA7);     // Invert
+    disp.flush();
+
+    // disp.cmd(0xA7);     // Invert
 
     writeln!(hstdout, "Init success").unwrap();
 
