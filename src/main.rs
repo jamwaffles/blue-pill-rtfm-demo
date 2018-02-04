@@ -7,52 +7,73 @@ extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_rtfm_macros;
 extern crate cortex_m_semihosting as sh;
-extern crate stm32f103xx_hal as hal;
-extern crate embedded_hal;
-extern crate aligned;
+extern crate stm32f103xx_hal as blue_pill;
+extern crate embedded_hal as hal;
 
 use cortex_m::asm;
-use aligned::Aligned;
-use hal::prelude::*;
-use hal::time::{Hertz};
+use blue_pill::prelude::*;
+use blue_pill::time::{Hertz};
 use cortex_m_rtfm_macros::app;
 use rtfm::{ Threshold};
+use blue_pill::spi::{ Spi };
+use hal::spi::{ Mode, Phase, Polarity };
+use blue_pill::gpio::{ Input, Output, PushPull, Floating, Alternate };
+use hal::digital::OutputPin;
+use blue_pill::gpio::gpioa::{ PA5, PA6, PA7 };
+use blue_pill::gpio::gpiob::{ PB0, PB1 };
+use blue_pill::stm32f103xx::SPI1;
 
 use core::fmt::Write;
 
 use sh::hio;
 use sh::hio::{ HStdout };
 
-const _0: u8 = 3;
-const _1: u8 = 7;
-// const LATCH_DELAY: Microseconds = Microseconds(50);
-const WS2812B_FREQUENCY: Hertz = Hertz(800_000);
+struct SSD1306<SPI, RST, DC>
+{
+    spi: SPI,
+    rst: RST,
+    dc: DC,
+}
+
+impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
+    SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+    RST: OutputPin,
+    DC: OutputPin
+    {
+    pub fn new(spi: SPI, rst: RST, dc: DC) -> Self {
+        SSD1306 {
+            spi,
+            rst,
+            dc,
+        }
+    }
+}
+
+pub type OledDisplay = SSD1306<
+    Spi<
+        SPI1,
+        (
+            PA5<Alternate<PushPull>>,
+            PA6<Input<Floating>>,
+            PA7<Alternate<PushPull>>,
+        ),
+    >,
+    PB0<Output<PushPull>>,  // B0
+    PB1<Output<PushPull>>,  // B1
+>;
 
 // TASKS AND RESOURCES
 app! {
-    device: hal::stm32f103xx,
+    device: blue_pill::stm32f103xx,
 
     resources: {
-        // static BUSY: bool = false;
-        // static CONTEXT_SWITCHES: u16 = 0;
-        // static FRAMES: u8 = 0;
-        // static RGB_ARRAY: Aligned<u32, [u8; 72]> = Aligned([0; 72]);
-        // static RX_BUFFER: Buffer<[u8; 72], Dma1Channel5> = Buffer::new([0; 72]);
-        // static SLEEP_CYCLES: u32 = 0;
-        // static TX_BUFFER: Buffer<[u8; 13], Dma1Channel4> = Buffer::new([0; 13]);
-        // static WS2812B_BUFFER: Buffer<[u8; 577], Dma1Channel2> =
-        //     Buffer::new([0; 577]);
-
-        // Num LEDs * 3
-        // static RGB_ARRAY: Aligned<u32, [u8; 3]> = Aligned([0; 3]);
-        // Num LEDs * 3 * 24? One byte for each bit?
-        // static WS2812B_BUFFER: Buffer<[u8; 72], Dma1Channel2> = Buffer::new([0; 72]);
-
+        static DISP: OledDisplay;
         static DBG: HStdout;
     },
 
     idle: {
         resources: [
+            DISP,
             DBG,
         ],
     },
@@ -62,8 +83,6 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let mut hstdout = hio::hstdout().unwrap();
     writeln!(hstdout, "Init start...").unwrap();
 
-    let timer1 = p.device.TIM1;
-
     let mut flash = p.device.FLASH.constrain();
     let mut rcc = p.device.RCC.constrain();
 
@@ -72,29 +91,37 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let mut afio = p.device.AFIO.constrain(&mut rcc.apb2);
 
     let mut gpioa = p.device.GPIOA.split(&mut rcc.apb2);
+    let mut gpiob = p.device.GPIOB.split(&mut rcc.apb2);
 
-    let c1 = gpioa.pa0.into_alternate_push_pull(&mut gpioa.crl);
-    let c2 = gpioa.pa1.into_alternate_push_pull(&mut gpioa.crl);
-    let c3 = gpioa.pa2.into_alternate_push_pull(&mut gpioa.crl);
-    let c4 = gpioa.pa3.into_alternate_push_pull(&mut gpioa.crl);
+    let nss = gpioa.pa4.into_push_pull_output(&mut gpioa.crl);
 
-    writeln!(hstdout, "Init").unwrap();
+    // SPI1
+    let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
+    let miso = gpioa.pa6;
+    let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let mut pwm = p.device.TIM2.pwm(
-        (c1, c2, c3, c4),
+    let rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
+    let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
+
+    let mut spi = Spi::spi1(
+        p.device.SPI1,
+        (sck, miso, mosi),
         &mut afio.mapr,
-        WS2812B_FREQUENCY,
+        Mode {
+            polarity: Polarity::IdleLow,
+            phase: Phase::CaptureOnFirstTransition,
+        },
+        6_400_000.hz(),
         clocks,
-        &mut rcc.apb1,
-    )
-    // PA3 (because T2C4 is on PA3, c4 above is 3rd item in tuple (0 indexed))
-    .3;
+        &mut rcc.apb2,
+    );
 
-    pwm.enable();
+    let disp = SSD1306::new(spi, rst, dc);
 
     writeln!(hstdout, "Init success").unwrap();
 
     init::LateResources {
+        DISP: disp,
         DBG: hstdout,
     }
 }
