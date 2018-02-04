@@ -23,6 +23,9 @@ git = "https://github.com/japaric/stm32f103xx-hal.git"
 features = ["rt"]
 version = "*"
 
+[dependencies.ssd1306]
+path = "../ssd1306"
+
 # disable both incremental compilation and parallel codegen to reduce the chances of running into
 # rust-lang/rust#47074
 [profile.dev]

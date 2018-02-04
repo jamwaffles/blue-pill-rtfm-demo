@@ -10,7 +10,7 @@ extern crate cortex_m_semihosting as sh;
 extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
-mod ssd1306;
+extern crate ssd1306;
 
 use cortex_m::asm;
 use blue_pill::prelude::*;
