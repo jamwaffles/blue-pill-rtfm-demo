@@ -57,11 +57,15 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
     }
 
     pub fn cmd(&mut self, cmd: u8) {
-       self.dc.set_low();
+       self.cmds(&[ cmd ]);
+    }
 
-       self.spi.write(&[ cmd ]);
+    pub fn cmds(&mut self, cmds: &[u8]) {
+        self.dc.set_low();
 
-       self.dc.set_high();
+        self.spi.write(cmds);
+
+        self.dc.set_high();
     }
 
     pub fn init(&mut self) {
@@ -85,9 +89,7 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
             0xAf // 24 disp on
         ];
 
-        for cmd in init_commands.iter() {
-            self.cmd(*cmd);
-        }
+        self.cmds(&init_commands);
     }
 
     pub fn flush(&mut self) {
@@ -97,11 +99,9 @@ impl<SPI, RST, DC> SSD1306<SPI, RST, DC> where
              0x22, // pages
              0, 7 /* (height>>3)-1 */];
 
-        for cmd in flush_commands.iter() {
-            self.cmd(*cmd);
-        }
+        self.cmds(&flush_commands);
 
-        // Not a command
+        // 1 = data, 0 = command
         self.dc.set_high();
 
         self.spi.write(&self.buffer);
@@ -182,8 +182,6 @@ fn init(p: init::Peripherals) -> init::LateResources {
     disp.init();
 
     disp.flush();
-
-    // disp.cmd(0xA7);     // Invert
 
     writeln!(hstdout, "Init success").unwrap();
 
