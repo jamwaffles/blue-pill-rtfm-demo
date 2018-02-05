@@ -26,9 +26,6 @@ version = "*"
 [dependencies.ssd1306]
 path = "../ssd1306"
 
-[dependencies.embedded-graphics]
-path = "../embedded-graphics"
-
 # disable both incremental compilation and parallel codegen to reduce the chances of running into
 # rust-lang/rust#47074
 [profile.dev]

@@ -11,8 +11,6 @@ extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
 extern crate ssd1306;
-extern crate embedded_graphics;
-use embedded_graphics::Drawing;
 
 // use cortex_m::asm;
 use blue_pill::prelude::*;
@@ -28,7 +26,7 @@ use core::fmt::Write;
 use sh::hio;
 use sh::hio::{ HStdout };
 
-use ssd1306::SSD1306;
+use ssd1306::{ SSD1306, Drawing };
 
 pub type OledDisplay = SSD1306<
     Spi<
