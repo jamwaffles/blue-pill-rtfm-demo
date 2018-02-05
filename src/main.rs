@@ -11,6 +11,8 @@ extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
 extern crate ssd1306;
+extern crate embedded_graphics;
+use embedded_graphics::Drawing;
 
 // use cortex_m::asm;
 use blue_pill::prelude::*;
@@ -98,6 +100,11 @@ fn init(p: init::Peripherals) -> init::LateResources {
     disp.reset();
 
     disp.init();
+
+    disp.set_pixel(0, 0, 1);
+    disp.set_pixel(127, 0, 1);
+    disp.set_pixel(127, 63, 1);
+    disp.set_pixel(0, 63, 1);
 
     disp.flush();
 

@@ -39,6 +39,7 @@ dependencies = [
  "cortex-m-rtfm 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m-rtfm-macros 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m-semihosting 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embedded-graphics 0.1.0",
  "embedded-hal 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ssd1306 0.1.0",
@@ -127,6 +128,10 @@ dependencies = [
 name = "cortex-m-semihosting"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "embedded-graphics"
+version = "0.1.0"
 
 [[package]]
 name = "embedded-hal"
@@ -246,6 +251,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "ssd1306"
 version = "0.1.0"
 dependencies = [
+ "embedded-graphics 0.1.0",
  "embedded-hal 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
