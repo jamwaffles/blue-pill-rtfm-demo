@@ -12,22 +12,17 @@ extern crate embedded_hal as hal;
 
 extern crate ssd1306;
 
-use cortex_m::asm;
+// use cortex_m::asm;
 use blue_pill::prelude::*;
-use blue_pill::time::{Hertz};
 use cortex_m_rtfm_macros::app;
 use rtfm::{ Threshold};
 use blue_pill::spi::{ Spi };
 use hal::spi::{ Mode, Phase, Polarity };
 use blue_pill::gpio::{ Input, Output, PushPull, Floating, Alternate };
-use hal::digital::OutputPin;
 use blue_pill::gpio::gpioa::{ PA5, PA6, PA7 };
 use blue_pill::gpio::gpiob::{ PB0, PB1 };
 use blue_pill::stm32f103xx::SPI1;
-use blue_pill::delay::Delay;
-
 use core::fmt::Write;
-
 use sh::hio;
 use sh::hio::{ HStdout };
 
@@ -77,8 +72,6 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let mut gpioa = p.device.GPIOA.split(&mut rcc.apb2);
     let mut gpiob = p.device.GPIOB.split(&mut rcc.apb2);
 
-    let nss = gpioa.pa4.into_push_pull_output(&mut gpioa.crl);
-
     // SPI1
     let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
     let miso = gpioa.pa6;
@@ -87,7 +80,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
     let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
-    let mut spi = Spi::spi1(
+    let spi = Spi::spi1(
         p.device.SPI1,
         (sck, miso, mosi),
         &mut afio.mapr,
@@ -95,7 +88,6 @@ fn init(p: init::Peripherals) -> init::LateResources {
             polarity: Polarity::IdleLow,
             phase: Phase::CaptureOnFirstTransition,
         },
-        // https://github.com/adafruit/Adafruit_SSD1306/blob/master/Adafruit_SSD1306.cpp#L197
         8.mhz(),
         clocks,
         &mut rcc.apb2,
@@ -104,6 +96,7 @@ fn init(p: init::Peripherals) -> init::LateResources {
     let mut disp = SSD1306::new(spi, rst, dc);
 
     disp.reset();
+
     disp.init();
 
     disp.flush();
@@ -117,7 +110,6 @@ fn init(p: init::Peripherals) -> init::LateResources {
 }
 
 fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
-    // late resources can be used at this point
     let hstdout: &'static mut HStdout = r.DBG;
 
     loop {
