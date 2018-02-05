@@ -102,17 +102,9 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
 
     disp.init();
 
-    disp.set_pixel(0, 0, 1);
-    disp.set_pixel(0, 5, 1);
-    disp.set_pixel(5, 5, 1);
-    disp.set_pixel(5, 0, 1);
-    disp.set_pixel(127, 0, 1);
-    disp.set_pixel(127, 63, 1);
-    disp.set_pixel(0, 63, 1);
-
     let raw = include_bytes!("../samuel.raw");
 
-    disp.draw_image_8bpp(raw, 62, 48);
+    disp.draw_image_8bpp(raw, 62, 48, 16, 16);
 
     disp.flush();
 
