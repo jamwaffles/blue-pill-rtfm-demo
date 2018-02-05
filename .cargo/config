@@ -27,7 +27,7 @@ rustflags = [
 ]
 
 [target.thumbv7em-none-eabihf]
-runner = 'arm-none-eabi-gdb.exe -iex "set auto-load safe-path /"'
+runner = 'arm-none-eabi-gdb'
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
