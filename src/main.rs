@@ -2,6 +2,7 @@
 #![feature(const_fn)]
 #![feature(proc_macro)]
 #![feature(used)]
+#![feature(slice_patterns)]
 
 extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
@@ -48,17 +49,19 @@ app! {
     resources: {
         static DISP: OledDisplay;
         static DBG: HStdout;
+        static COUNTER: u32 = 0;
     },
 
     idle: {
         resources: [
             DISP,
             DBG,
+            COUNTER,
         ],
     },
 }
 
-fn init(p: init::Peripherals) -> init::LateResources {
+fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     let mut hstdout = hio::hstdout().unwrap();
     writeln!(hstdout, "Init start...").unwrap();
 
@@ -100,9 +103,16 @@ fn init(p: init::Peripherals) -> init::LateResources {
     disp.init();
 
     disp.set_pixel(0, 0, 1);
+    disp.set_pixel(0, 5, 1);
+    disp.set_pixel(5, 5, 1);
+    disp.set_pixel(5, 0, 1);
     disp.set_pixel(127, 0, 1);
     disp.set_pixel(127, 63, 1);
     disp.set_pixel(0, 63, 1);
+
+    let raw = include_bytes!("../samuel.raw");
+
+    disp.draw_image_8bpp(raw, 62, 48);
 
     disp.flush();
 
@@ -116,8 +126,16 @@ fn init(p: init::Peripherals) -> init::LateResources {
 
 fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
     let hstdout: &'static mut HStdout = r.DBG;
+    let count: &'static mut u32 = r.COUNTER;
+    let disp: &'static mut OledDisplay = r.DISP;
 
     loop {
         writeln!(hstdout, "Idle").unwrap();
+
+        *count += 1;
+
+        // disp.set_index(*count);
+
+        // disp.flush();
     }
 }
