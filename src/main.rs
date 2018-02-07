@@ -12,6 +12,7 @@ extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
 extern crate ssd1306;
+extern crate embedded_graphics;
 
 // use cortex_m::asm;
 use blue_pill::prelude::*;
@@ -28,6 +29,7 @@ use sh::hio;
 use sh::hio::{ HStdout };
 
 use ssd1306::{ SSD1306, Drawing };
+use embedded_graphics::image::{ Image1BPP };
 
 pub type OledDisplay = SSD1306<
     Spi<
@@ -102,9 +104,13 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
 
     disp.init();
 
-    let raw = include_bytes!("../samuel.raw");
+    let image = Image1BPP {
+        width: 62,
+        height: 48,
+        imagedata: include_bytes!("../samuel_1bpp.raw")
+    };
 
-    disp.draw_image_8bpp(raw, 62, 48, 16, 16);
+    disp.draw_image_1bpp(&image, (128 / 2) - (image.width / 2), 16);
 
     disp.flush();
 
