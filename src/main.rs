@@ -112,7 +112,7 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
 
     disp.draw_image_1bpp(&image, (128 / 2) - (image.width / 2), 16);
 
-    disp.draw_text_1bpp("Hello world", 0, 0);
+    disp.draw_text_1bpp("#((", 0, 0);
 
     disp.flush();
 
