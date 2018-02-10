@@ -105,14 +105,14 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     disp.init();
 
     let image = Image1BPP {
-        width: 62,
+        width: 48,
         height: 48,
-        imagedata: include_bytes!("../samuel_1bpp.raw")
+        imagedata: include_bytes!("../rust_1bpp.raw")
     };
 
     disp.draw_image_1bpp(&image, (128 / 2) - (image.width / 2), 16);
 
-    disp.draw_text_1bpp("#((", 0, 0);
+    disp.draw_text_1bpp("Hello, world!", 25, 0);
 
     disp.flush();
 
