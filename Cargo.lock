@@ -132,6 +132,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "embedded-graphics"
 version = "0.1.0"
+dependencies = [
+ "cortex-m 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "embedded-hal"
@@ -251,6 +254,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "ssd1306"
 version = "0.1.0"
 dependencies = [
+ "cortex-m 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "embedded-graphics 0.1.0",
  "embedded-hal 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
