@@ -22,11 +22,14 @@ use blue_pill::spi::{ Spi };
 use hal::spi::{ Mode, Phase, Polarity };
 use blue_pill::gpio::{ Input, Output, PushPull, Floating, Alternate };
 use blue_pill::gpio::gpioa::{ PA5, PA6, PA7 };
-use blue_pill::gpio::gpiob::{ PB0, PB1 };
-use blue_pill::stm32f103xx::SPI1;
+use blue_pill::gpio::gpiob::{ PB0, PB1, PB6, PB7 };
+use blue_pill::serial::Serial;
+use blue_pill::stm32f103xx::{ SPI1, USART1 };
 use core::fmt::Write;
 use sh::hio;
 use sh::hio::{ HStdout };
+#[macro_use(block)]
+extern crate nb;
 
 use ssd1306::{ SSD1306, Drawing };
 use embedded_graphics::image::{ Image1BPP };
@@ -44,6 +47,8 @@ pub type OledDisplay = SSD1306<
     PB1<Output<PushPull>>,  // B1 -> DC
 >;
 
+type SerialInterface = Serial<USART1, (PB6<Alternate<PushPull>>, PB7<Input<Floating>>)>;
+
 // TASKS AND RESOURCES
 app! {
     device: blue_pill::stm32f103xx,
@@ -52,6 +57,7 @@ app! {
         static DISP: OledDisplay;
         static DBG: HStdout;
         static COUNTER: u32 = 0;
+        static SERIAL: SerialInterface;
     },
 
     idle: {
@@ -59,6 +65,7 @@ app! {
             DISP,
             DBG,
             COUNTER,
+            SERIAL,
         ],
     },
 }
@@ -116,11 +123,24 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
 
     disp.flush();
 
+    let tx = gpiob.pb6.into_alternate_push_pull(&mut gpiob.crl);
+    let rx = gpiob.pb7;
+
+    let serial = Serial::usart1(
+        p.device.USART1,
+        (tx, rx),
+        &mut afio.mapr,
+        9_600.bps(),
+        clocks,
+        &mut rcc.apb2,
+    );
+
     writeln!(hstdout, "Init success").unwrap();
 
     init::LateResources {
         DISP: disp,
         DBG: hstdout,
+        SERIAL: serial
     }
 }
 
@@ -128,9 +148,19 @@ fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
     let hstdout: &'static mut HStdout = r.DBG;
     let count: &'static mut u32 = r.COUNTER;
     let disp: &'static mut OledDisplay = r.DISP;
+    let serial: &'static mut SerialInterface = r.SERIAL;
 
     loop {
         writeln!(hstdout, "Idle").unwrap();
+
+        let (mut tx, mut rx) = serial.split();
+
+        let sent = b"AT";
+
+        block!(tx.write(b'A')).ok();
+        block!(tx.write(b'T')).ok();
+
+        let received = block!(rx.read()).unwrap();
 
         *count += 1;
 
