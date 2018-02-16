@@ -26,6 +26,9 @@ version = "*"
 [dependencies.ssd1306]
 path = "../ssd1306"
 
+[dependencies.esp8266-driver]
+path = "../esp8266-driver"
+
 [dependencies.embedded-graphics]
 path = "../embedded-graphics"
 

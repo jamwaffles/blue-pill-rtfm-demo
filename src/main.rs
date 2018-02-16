@@ -13,6 +13,7 @@ extern crate stm32f103xx_hal as blue_pill;
 extern crate embedded_hal as hal;
 
 extern crate ssd1306;
+extern crate esp8266_driver;
 extern crate embedded_graphics;
 
 use cortex_m::asm;
@@ -33,6 +34,7 @@ use sh::hio::{ HStdout };
 extern crate nb;
 
 use ssd1306::{ SSD1306, Drawing };
+use esp8266_driver::{ ESP8266 };
 use embedded_graphics::image::{ Image1BPP };
 
 pub type OledDisplay = SSD1306<
@@ -145,31 +147,35 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
         &mut rcc.apb2,
     );
 
+    let esp = ESP8266::new(serial);
+
     // let rx = serial.split().1;
 
-    let mut channels = p.device.DMA1.split(&mut rcc.ahb);
-    // channels.4.listen(Event::HalfTransfer);
-    // channels.4.listen(Event::TransferComplete);
+    // let mut channels = p.device.DMA1.split(&mut rcc.ahb);
+    // // channels.4.listen(Event::HalfTransfer);
+    // // channels.4.listen(Event::TransferComplete);
 
-    let (tx, rx) = serial.split();
+    // let (tx, rx) = serial.split();
 
-    // let buf = singleton!(: [u8; 5] = [0; 5]).unwrap();
+    // // let buf = singleton!(: [u8; 5] = [0; 5]).unwrap();
 
-    let (_, _txc, _tx) = tx.write_all(channels.4, b"ATE0\r\n").wait();
+    // let (_, _txc, _tx) = tx.write_all(channels.4, b"ATE0\r\n").wait();
 
 
-    let (_buf, _rxc, _rx) = rx.read_exact(channels.5, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
-    writeln!(hstdout, "ATE0 response: {:?}", _buf).unwrap();
+    // let (_buf, _rxc, _rx) = rx.read_exact(channels.5, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
+    // writeln!(hstdout, "ATE0 response: {:?}", _buf).unwrap();
+
+    // asm::bkpt();
+
+    // let (_, _txc, _tx) = _tx.write_all(_txc, b"AT+CIPMUX=1\r\n").wait();
+    // let (_buf, _rxc, _rx) = _rx.read_exact(_rxc, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
+    // writeln!(hstdout, "CIPMUX response: {:?}", _buf).unwrap();
+
+    // asm::bkpt();
+
+    // writeln!(hstdout, "Init success").unwrap();
 
     asm::bkpt();
-
-    let (_, _txc, _tx) = _tx.write_all(_txc, b"AT+CIPMUX=1\r\n").wait();
-    let (_buf, _rxc, _rx) = _rx.read_exact(_rxc, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
-    writeln!(hstdout, "CIPMUX response: {:?}", _buf).unwrap();
-
-    asm::bkpt();
-
-    writeln!(hstdout, "Init success").unwrap();
 
     init::LateResources {
         // DISP: disp,

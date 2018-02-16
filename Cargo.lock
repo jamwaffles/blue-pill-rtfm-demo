@@ -40,7 +40,8 @@ dependencies = [
  "cortex-m-rtfm-macros 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m-semihosting 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "embedded-graphics 0.1.0",
- "embedded-hal 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embedded-hal 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "esp8266-driver 0.1.0",
  "nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ssd1306 0.1.0",
  "stm32f103xx-hal 0.1.0 (git+https://github.com/japaric/stm32f103xx-hal.git)",
@@ -135,7 +136,7 @@ version = "0.1.0"
 
 [[package]]
 name = "embedded-hal"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -147,6 +148,13 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "backtrace 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "esp8266-driver"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -252,7 +260,7 @@ name = "ssd1306"
 version = "0.1.0"
 dependencies = [
  "embedded-graphics 0.1.0",
- "embedded-hal 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embedded-hal 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -273,7 +281,7 @@ source = "git+https://github.com/japaric/stm32f103xx-hal.git#4e9dae9b3758b780d39
 dependencies = [
  "cast 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "embedded-hal 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embedded-hal 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "stm32f103xx 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -363,7 +371,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum cortex-m-rtfm 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d2402261ad624289717f918b89d2d8dff2a7d701b0545958257c149ab1d93603"
 "checksum cortex-m-rtfm-macros 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ed38281bfe3b27bf5420803f5e58e85f2f4024d698d3e47351efe526431cba04"
 "checksum cortex-m-semihosting 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "4a7a324a8c184dcd3d6bd44cb4f6f85c158de15a2a8e7cd7f550909213ce3de8"
-"checksum embedded-hal 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "c6e76f7b2a02d6d2a909bbd96e500ca31a8d58b86f7b1a4e97eded61581cc54b"
+"checksum embedded-hal 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "684b1fa3196f78342296d04edc2a6e5d053729d1b64a819dcb072810d706e267"
 "checksum error-chain 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d9435d864e017c3c6afeac1654189b06cdb491cf2ff73dbf0d73b0f292f42ff8"
 "checksum libc 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)" = "1e5d97d6708edaa407429faa671b942dc0f2727222fb6b6539bf1db936e4b121"
 "checksum nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "69f380b5fe9fab8c0d7a6a99cda23e2cc0463bedb2cbc3aada0813b98496ecdc"
