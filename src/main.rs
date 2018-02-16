@@ -4,6 +4,7 @@
 #![feature(used)]
 #![feature(slice_patterns)]
 
+#[macro_use(singleton)]
 extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_rtfm_macros;
@@ -14,7 +15,7 @@ extern crate embedded_hal as hal;
 extern crate ssd1306;
 extern crate embedded_graphics;
 
-// use cortex_m::asm;
+use cortex_m::asm;
 use blue_pill::prelude::*;
 use cortex_m_rtfm_macros::app;
 use rtfm::{ Threshold};
@@ -54,20 +55,29 @@ app! {
     device: blue_pill::stm32f103xx,
 
     resources: {
-        static DISP: OledDisplay;
+        // static DISP: OledDisplay;
         static DBG: HStdout;
         static COUNTER: u32 = 0;
-        static SERIAL: SerialInterface;
+        // static BUFFER: [[u8; 8]; 2] = [[0; 8]; 2];
+        // static CB: CircBuffer<[u8; 8], dma1::C5>;
+        // static SERIAL: SerialInterface;
     },
 
     idle: {
         resources: [
-            DISP,
+            // DISP,
             DBG,
             COUNTER,
-            SERIAL,
+            // SERIAL,
         ],
     },
+
+    // tasks: {
+    //     DMA1_CHANNEL4: {
+    //         path: rx,
+    //         resources: [CB],
+    //     },
+    // }
 }
 
 fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
@@ -105,62 +115,80 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let mut disp = SSD1306::new(spi, rst, dc);
+    // let mut disp = SSD1306::new(spi, rst, dc);
 
-    disp.reset();
+    // disp.reset();
 
-    disp.init();
+    // disp.init();
 
-    let image = Image1BPP {
-        width: 48,
-        height: 48,
-        imagedata: include_bytes!("../rust_1bpp.raw")
-    };
+    // let image = Image1BPP {
+    //     width: 48,
+    //     height: 48,
+    //     imagedata: include_bytes!("../rust_1bpp.raw")
+    // };
 
-    disp.draw_image_1bpp(&image, (128 / 2) - (image.width / 2), 16);
+    // disp.draw_image_1bpp(&image, (128 / 2) - (image.width / 2), 16);
 
-    disp.draw_text_1bpp("Hello, world!", 25, 0);
+    // disp.draw_text_1bpp("Hello, world!", 25, 0);
 
-    disp.flush();
+    // disp.flush();
 
-    let tx = gpiob.pb6.into_alternate_push_pull(&mut gpiob.crl);
-    let rx = gpiob.pb7;
+    let tx = gpioa.pa9.into_alternate_push_pull(&mut gpioa.crh);
+    let rx = gpioa.pa10;
 
     let serial = Serial::usart1(
         p.device.USART1,
         (tx, rx),
         &mut afio.mapr,
-        9_600.bps(),
+        115_200.bps(),
         clocks,
         &mut rcc.apb2,
     );
 
+    // let rx = serial.split().1;
+
+    let mut channels = p.device.DMA1.split(&mut rcc.ahb);
+    // channels.4.listen(Event::HalfTransfer);
+    // channels.4.listen(Event::TransferComplete);
+
+    let (tx, rx) = serial.split();
+
+    // let buf = singleton!(: [u8; 5] = [0; 5]).unwrap();
+
+    let (_, _txc, _tx) = tx.write_all(channels.4, b"ATE0\r\n").wait();
+
+
+    let (_buf, _rxc, _rx) = rx.read_exact(channels.5, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
+    writeln!(hstdout, "ATE0 response: {:?}", _buf).unwrap();
+
+    asm::bkpt();
+
+    let (_, _txc, _tx) = _tx.write_all(_txc, b"AT+CIPMUX=1\r\n").wait();
+    let (_buf, _rxc, _rx) = _rx.read_exact(_rxc, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
+    writeln!(hstdout, "CIPMUX response: {:?}", _buf).unwrap();
+
+    asm::bkpt();
+
     writeln!(hstdout, "Init success").unwrap();
 
     init::LateResources {
-        DISP: disp,
+        // DISP: disp,
         DBG: hstdout,
-        SERIAL: serial
+        // CB: rx.circ_read(channels.4, r.BUFFER),
+        // SERIAL: serial
     }
 }
 
 fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
     let hstdout: &'static mut HStdout = r.DBG;
     let count: &'static mut u32 = r.COUNTER;
-    let disp: &'static mut OledDisplay = r.DISP;
-    let serial: &'static mut SerialInterface = r.SERIAL;
+    // let disp: &'static mut OledDisplay = r.DISP;
+    // let serial: &'static mut SerialInterface = r.SERIAL;
 
     loop {
         writeln!(hstdout, "Idle").unwrap();
 
-        let (mut tx, mut rx) = serial.split();
 
-        let sent = b"AT";
-
-        block!(tx.write(b'A')).ok();
-        block!(tx.write(b'T')).ok();
-
-        let received = block!(rx.read()).unwrap();
 
         *count += 1;
 
@@ -169,3 +197,11 @@ fn idle(_t: &mut Threshold, r: idle::Resources) -> ! {
         // disp.flush();
     }
 }
+
+// fn rx(_t: &mut Threshold, mut r: DMA1_CHANNEL4::Resources) {
+//     r.CB
+//         .peek(|_buf, _half| {
+//             asm::bkpt();
+//         })
+//         .unwrap();
+// }
