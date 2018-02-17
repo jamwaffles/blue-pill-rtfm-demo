@@ -11,7 +11,7 @@ dependencies = [
  "backtrace-sys 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)",
  "cfg-if 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc-demangle 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustc-demangle 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -154,7 +154,10 @@ dependencies = [
 name = "esp8266-driver"
 version = "0.1.0"
 dependencies = [
+ "cortex-m 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "embedded-hal 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stm32f103xx-hal 0.1.0 (git+https://github.com/japaric/stm32f103xx-hal.git)",
 ]
 
 [[package]]
@@ -231,7 +234,7 @@ dependencies = [
 
 [[package]]
 name = "rustc-demangle"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -384,7 +387,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum redox_syscall 0.1.37 (registry+https://github.com/rust-lang/crates.io-index)" = "0d92eecebad22b767915e4d529f89f28ee96dbbf5a4810d2b844373f136417fd"
 "checksum rtfm-core 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "11ba440da895db782b3e459c39316133e36ee13c60a836bb99f7df4940beb441"
 "checksum rtfm-syntax 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "c87b30451349244ed3d59115a9b57a3723ae7f512c906223fd0a32e37719d699"
-"checksum rustc-demangle 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "aee45432acc62f7b9a108cc054142dac51f979e69e71ddce7d6fc7adf29e817e"
+"checksum rustc-demangle 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "f312457f8a4fa31d3581a6f423a70d6c33a10b95291985df55f1ff670ec10ce8"
 "checksum rustc_version 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b9743a7670d88d5d52950408ecdb7c71d8986251ab604d4689dd2ca25c9bca69"
 "checksum semver 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a3186ec9e65071a2095434b1f5bb24838d4e8e130f584c790f6033c79943537"
 "checksum semver-parser 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"

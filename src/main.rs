@@ -97,25 +97,25 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     let mut gpiob = p.device.GPIOB.split(&mut rcc.apb2);
 
     // SPI1
-    let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
-    let miso = gpioa.pa6;
-    let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
+    // let sck = gpioa.pa5.into_alternate_push_pull(&mut gpioa.crl);
+    // let miso = gpioa.pa6;
+    // let mosi = gpioa.pa7.into_alternate_push_pull(&mut gpioa.crl);
 
-    let rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
-    let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
+    // let rst = gpiob.pb0.into_push_pull_output(&mut gpiob.crl);
+    // let dc = gpiob.pb1.into_push_pull_output(&mut gpiob.crl);
 
-    let spi = Spi::spi1(
-        p.device.SPI1,
-        (sck, miso, mosi),
-        &mut afio.mapr,
-        Mode {
-            polarity: Polarity::IdleLow,
-            phase: Phase::CaptureOnFirstTransition,
-        },
-        8.mhz(),
-        clocks,
-        &mut rcc.apb2,
-    );
+    // let spi = Spi::spi1(
+    //     p.device.SPI1,
+    //     (sck, miso, mosi),
+    //     &mut afio.mapr,
+    //     Mode {
+    //         polarity: Polarity::IdleLow,
+    //         phase: Phase::CaptureOnFirstTransition,
+    //     },
+    //     8.mhz(),
+    //     clocks,
+    //     &mut rcc.apb2,
+    // );
 
     // let mut disp = SSD1306::new(spi, rst, dc);
 
@@ -135,7 +135,12 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
 
     // disp.flush();
 
-    let tx = gpioa.pa9.into_alternate_push_pull(&mut gpioa.crh);
+    let mut tx_gpio = gpioa.pa9.into_push_pull_output(&mut gpioa.crh);
+    // Set GPIO low before turning into a USART to stop it sending 0b11100000 before first xfer
+    tx_gpio.set_low();
+
+    // USART1
+    let tx = tx_gpio.into_alternate_push_pull(&mut gpioa.crh);
     let rx = gpioa.pa10;
 
     let serial = Serial::usart1(
@@ -147,33 +152,23 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
         &mut rcc.apb2,
     );
 
-    let esp = ESP8266::new(serial);
+    let channels = p.device.DMA1.split(&mut rcc.ahb);
 
-    // let rx = serial.split().1;
+    let (tx, rx) = serial.split();
 
-    // let mut channels = p.device.DMA1.split(&mut rcc.ahb);
-    // // channels.4.listen(Event::HalfTransfer);
-    // // channels.4.listen(Event::TransferComplete);
+    let (_, txc, tx) = tx.write_all(channels.4, b"AT+RST\r\n").wait();
 
-    // let (tx, rx) = serial.split();
+    let buf = singleton!(: [u8; 4] = [0u8; 4]).unwrap();
 
-    // // let buf = singleton!(: [u8; 5] = [0; 5]).unwrap();
+    let t = rx.read_exact(channels.5, buf);
 
-    // let (_, _txc, _tx) = tx.write_all(channels.4, b"ATE0\r\n").wait();
+    while !t.is_done() {
+        // let _slice = t.peek();
 
+        // asm::bkpt();
+    }
 
-    // let (_buf, _rxc, _rx) = rx.read_exact(channels.5, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
-    // writeln!(hstdout, "ATE0 response: {:?}", _buf).unwrap();
-
-    // asm::bkpt();
-
-    // let (_, _txc, _tx) = _tx.write_all(_txc, b"AT+CIPMUX=1\r\n").wait();
-    // let (_buf, _rxc, _rx) = _rx.read_exact(_rxc, singleton!(: [u8; 5] = [0; 5]).unwrap()).wait();
-    // writeln!(hstdout, "CIPMUX response: {:?}", _buf).unwrap();
-
-    // asm::bkpt();
-
-    // writeln!(hstdout, "Init success").unwrap();
+    let _slice = t.peek();
 
     asm::bkpt();
 

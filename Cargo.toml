@@ -9,8 +9,11 @@ cortex-m = "0.4.3"
 cortex-m-rtfm = "0.3.1"
 cortex-m-rtfm-macros = "0.3.0"
 cortex-m-semihosting = "0.2.0"
-embedded-hal = "0.1.0"
 nb = "0.1.1"
+
+[dependencies.embedded-hal]
+version = "0.1.2"
+features = ["unproven"]
 
 [dependencies.cortex-m-rt]
 features = ["abort-on-panic"]
