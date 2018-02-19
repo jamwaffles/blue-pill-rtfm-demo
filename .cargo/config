@@ -1,6 +1,6 @@
 # Arguments and setup for running in GDB
 [target.thumbv6m-none-eabi]
-runner = 'arm-none-eabi-gdb'
+runner = [ "arm-none-eabi-gdb.exe", "-iex", "set auto-load safe-path ." ]
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
@@ -9,7 +9,7 @@ rustflags = [
 ]
 
 [target.thumbv7m-none-eabi]
-runner = 'arm-none-eabi-gdb'
+runner = [ "arm-none-eabi-gdb.exe", "-iex", "set auto-load safe-path ." ]
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
@@ -18,7 +18,7 @@ rustflags = [
 ]
 
 [target.thumbv7em-none-eabi]
-runner = 'arm-none-eabi-gdb'
+runner = [ "arm-none-eabi-gdb.exe", "-iex", "set auto-load safe-path ." ]
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
@@ -27,7 +27,7 @@ rustflags = [
 ]
 
 [target.thumbv7em-none-eabihf]
-runner = 'arm-none-eabi-gdb'
+runner = [ "arm-none-eabi-gdb.exe", "-iex", "set auto-load safe-path ." ]
 rustflags = [
   "-C", "link-arg=-Tlink.x",
   "-C", "linker=arm-none-eabi-ld",
